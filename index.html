@@ -98,25 +98,62 @@
     <div class="bg-zinc-800/60 backdrop-blur-2xl p-8 rounded-3xl shadow-2xl w-full max-w-xl border border-zinc-700">
       <h1 class="text-3xl font-extrabold mb-6 text-center tracking-tight">💹 Binance Fee & Profit Calculator</h1>
 
-      <div class="space-y-4">
-        <input id="buyPrice" type="number" step="any" class="w-full p-3 bg-zinc-900 text-white border border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="🪙 Coin Buy Price (e.g. 30000)">
-        <input id="money" type="number" step="any" class="w-full p-3 bg-zinc-900 text-white border border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="💵 Money to Invest (e.g. 100)">
+      <div class="space-y-6">
 
-        <select id="membership" class="w-full p-3 bg-zinc-900 text-white border border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        <!-- Floating Label - Buy Price -->
+        <div class="relative">
+          <input id="buyPrice" type="number" step="any"
+                 class="peer w-full p-3 pt-6 bg-zinc-900 text-white border border-zinc-700 rounded-xl placeholder-transparent focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                 placeholder="🪙 Coin Buy Price (e.g. 30000)">
+          <label for="buyPrice"
+                 class="absolute left-3 top-3 text-sm text-zinc-400 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-zinc-500 peer-focus:top-3 peer-focus:text-sm peer-focus:text-emerald-400">
+            🪙 Coin Buy Price (e.g. 30000)
+          </label>
+        </div>
+
+        <!-- Floating Label - Money -->
+        <div class="relative">
+          <input id="money" type="number" step="any"
+                 class="peer w-full p-3 pt-6 bg-zinc-900 text-white border border-zinc-700 rounded-xl placeholder-transparent focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                 placeholder="💵 Money to Invest (e.g. 100)">
+          <label for="money"
+                 class="absolute left-3 top-3 text-sm text-zinc-400 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-zinc-500 peer-focus:top-3 peer-focus:text-sm peer-focus:text-emerald-400">
+            💵 Money to Invest (e.g. 100)
+          </label>
+        </div>
+
+        <!-- Select Membership -->
+        <select id="membership"
+                class="w-full p-3 bg-zinc-900 text-white border border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
           <option value="regular">🧍 Regular</option>
           <option value="vip">🧑‍💼 VIP</option>
         </select>
 
+        <!-- Checkbox -->
         <div class="flex items-center space-x-2">
           <input id="useBnb" type="checkbox" class="accent-emerald-500" />
           <label for="useBnb" class="text-sm">Use BNB for Fee (25% Discount)</label>
         </div>
 
-        <input id="profitPercent" type="number" step="any" class="w-full p-3 bg-zinc-900 text-white border border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="🎯 Target Profit % (e.g. 5)">
+        <!-- Floating Label - Profit Percent -->
+        <div class="relative">
+          <input id="profitPercent" type="number" step="any"
+                 class="peer w-full p-3 pt-6 bg-zinc-900 text-white border border-zinc-700 rounded-xl placeholder-transparent focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                 placeholder="🎯 Target Profit % (e.g. 5)">
+          <label for="profitPercent"
+                 class="absolute left-3 top-3 text-sm text-zinc-400 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-zinc-500 peer-focus:top-3 peer-focus:text-sm peer-focus:text-emerald-400">
+            🎯 Target Profit % (e.g. 5)
+          </label>
+        </div>
+
+        <!-- Calculate Button -->
+        <button onclick="calculate()"
+                class="w-full bg-emerald-500 hover:bg-emerald-600 transition-all text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:scale-[1.02]">
+          🚀 Calculate
+        </button>
       </div>
 
-      <button onclick="calculate()" class="mt-6 w-full bg-emerald-500 hover:bg-emerald-600 transition-all text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:scale-[1.02]">🚀 Calculate</button>
-
+      <!-- Output -->
       <div id="output" class="mt-8"></div>
     </div>
   </main>
