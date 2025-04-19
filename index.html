@@ -58,14 +58,14 @@
 
       document.getElementById('output').innerHTML = `
         <div class="space-y-4 text-sm text-white animate-fadeIn">
-          <div class="bg-zinc-800 p-4 rounded-xl border border-emerald-600">
-            <strong>💰 Effective Money Used (After Fee):</strong><br>
-            <span class="text-lg font-semibold text-emerald-400">$${effectiveMoney.toFixed(2)}</span><br>
-            <span class="text-sm text-gray-400">${formatIdr(effectiveMoney)}</span>
-          </div>
           <div class="bg-zinc-800 p-4 rounded-xl border border-zinc-700">
             <strong>🪙 Total Coin Acquired:</strong><br>
             <span class="text-lg font-semibold">${amount.toFixed(8)}</span>
+          </div>
+          <div class="bg-zinc-800 p-4 rounded-xl border border-emerald-600">
+            <strong>💰 Money Invested (After Fee):</strong><br>
+            <span class="text-lg font-semibold text-emerald-400">$${effectiveMoney.toFixed(2)}</span><br>
+            <span class="text-sm text-gray-400">${formatIdr(effectiveMoney)}</span>
           </div>
           <div class="bg-zinc-800 p-4 rounded-xl border border-amber-600">
             <strong>🎯 Must Sell At:</strong><br>
