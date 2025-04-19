@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Binance Fee & Profit Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    let usdToIdr = 0;
+
+    async function fetchExchangeRate() {
+      try {
+        const res = await fetch("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json");
+        const data = await res.json();
+        usdToIdr = data.usd.idr;
+      } catch (err) {
+        console.error("Failed to fetch exchange rate:", err);
+        usdToIdr = 0;
+      }
+    }
+
+    async function calculate() {
+      if (usdToIdr === 0) await fetchExchangeRate();
+
+      const buyPrice = parseFloat(document.getElementById('buyPrice').value);
+      const money = parseFloat(document.getElementById('money').value);
+      const membership = document.getElementById('membership').value;
+      const profitPercent = parseFloat(document.getElementById('profitPercent').value);
+      const useBnbForFee = document.getElementById('useBnb').checked;
+
+      if (isNaN(buyPrice) || isNaN(money) || isNaN(profitPercent)) {
+        alert('Please fill in all required fields.');
+        return;
+      }
+
+      let feeRate = membership === 'vip' ? 0.0004 : 0.001;
+      if (useBnbForFee) feeRate *= 0.75;
+
+      const buyFee = money * feeRate;
+      const effectiveMoney = money - buyFee;
+      const amount = effectiveMoney / buyPrice;
+
+      const desiredProfit = money * (profitPercent / 100);
+      const totalNeededAfterSell = money + desiredProfit;
+
+      const requiredSellPrice = totalNeededAfterSell / (amount * (1 - feeRate));
+      const sellAmount = amount * requiredSellPrice;
+      const sellFee = sellAmount * feeRate;
+      const totalReceived = sellAmount - sellFee;
+      const netProfit = totalReceived - money;
+
+      const formatIdr = (val) => {
+        return "Rp" + (val * usdToIdr).toLocaleString('id-ID', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+      };
+
+      document.getElementById('output').innerHTML = `
+        <div class="space-y-4 text-sm text-white animate-fadeIn">
+          <div class="bg-zinc-800 p-4 rounded-xl border border-emerald-600">
+            <strong>💰 Effective Money Used (After Fee):</strong><br>
+            <span class="text-lg font-semibold text-emerald-400">$${effectiveMoney.toFixed(2)}</span><br>
+            <span class="text-sm text-gray-400">${formatIdr(effectiveMoney)}</span>
+          </div>
+          <div class="bg-zinc-800 p-4 rounded-xl border border-zinc-700">
+            <strong>🪙 Total Coin Acquired:</strong><br>
+            <span class="text-lg font-semibold">${amount.toFixed(8)}</span>
+          </div>
+          <div class="bg-zinc-800 p-4 rounded-xl border border-amber-600">
+            <strong>🎯 Must Sell At:</strong><br>
+            <span class="text-lg font-semibold text-yellow-400">$${requiredSellPrice.toFixed(2)}</span><br>
+            <span class="text-sm text-gray-400">${formatIdr(requiredSellPrice)}</span>
+          </div>
+          <div class="bg-zinc-800 p-4 rounded-xl border border-pink-600">
+            <strong>📈 Estimated Profit (After Fee):</strong><br>
+            <span class="text-lg font-semibold text-pink-400">$${netProfit.toFixed(2)}</span><br>
+            <span class="text-sm text-gray-400">${formatIdr(netProfit)}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    window.onload = fetchExchangeRate;
+  </script>
+  <style>
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(10px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-gray-950 to-slate-900 text-white min-h-screen flex flex-col font-sans">
+  <main class="flex-grow flex items-center justify-center p-6">
+    <div class="bg-zinc-800/60 backdrop-blur-2xl p-8 rounded-3xl shadow-2xl w-full max-w-xl border border-zinc-700">
+      <h1 class="text-3xl font-extrabold mb-6 text-center tracking-tight">💹 Binance Fee & Profit Calculator</h1>
+
+      <div class="space-y-4">
+        <input id="buyPrice" type="number" step="any" class="w-full p-3 bg-zinc-900 text-white border border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="🪙 Coin Buy Price (e.g. 30000)">
+        <input id="money" type="number" step="any" class="w-full p-3 bg-zinc-900 text-white border border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="💵 Money to Invest (e.g. 100)">
+
+        <select id="membership" class="w-full p-3 bg-zinc-900 text-white border border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <option value="regular">🧍 Regular</option>
+          <option value="vip">🧑‍💼 VIP</option>
+        </select>
+
+        <div class="flex items-center space-x-2">
+          <input id="useBnb" type="checkbox" class="accent-emerald-500" />
+          <label for="useBnb" class="text-sm">Use BNB for Fee (25% Discount)</label>
+        </div>
+
+        <input id="profitPercent" type="number" step="any" class="w-full p-3 bg-zinc-900 text-white border border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="🎯 Target Profit % (e.g. 5)">
+      </div>
+
+      <button onclick="calculate()" class="mt-6 w-full bg-emerald-500 hover:bg-emerald-600 transition-all text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:scale-[1.02]">🚀 Calculate</button>
+
+      <div id="output" class="mt-8"></div>
+    </div>
+  </main>
+
+  <footer class="text-gray-500 text-center p-4 mt-auto text-sm">
+    &copy; Made by Hanif – All rights reserved
+  </footer>
+</body>
+</html>
