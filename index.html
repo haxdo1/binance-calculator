@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Binance Fee & Profit Calculator</title>
-  
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
+
   <!-- Flowbite CSS -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.css" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
-  
+
   <!-- Toastify CSS and JS -->
   <link href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.js"></script>
@@ -19,7 +19,6 @@
   <script>
     let usdToIdr = 0;
 
-    // Fetch exchange rate function
     async function fetchExchangeRate() {
       try {
         const res = await fetch("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json");
@@ -32,7 +31,6 @@
       }
     }
 
-    // Function to show Toastify error message
     function showErrorToast(message) {
       Toastify({
         text: message,
@@ -48,13 +46,19 @@
       const buyPrice = parseFloat(document.getElementById('buyPrice').value);
       const money = parseFloat(document.getElementById('money').value);
       const membership = document.getElementById('membership').value;
-      const profitPercent = parseFloat(document.getElementById('profitPercent').value);
+      const profitPercentInput = document.getElementById('profitPercent').value;
+      const customSellPriceInput = document.getElementById('customSellPrice').value;
+      const profitPercent = parseFloat(profitPercentInput);
+      const customSellPrice = parseFloat(customSellPriceInput);
       const useBnbForFee = document.getElementById('useBnb').checked;
-      const customSellPrice = parseFloat(document.getElementById('customSellPrice').value);
 
-      // Check for missing or invalid fields
-      if (isNaN(buyPrice) || isNaN(money) || isNaN(profitPercent)) {
-        showErrorToast('Please fill in all required fields correctly.');
+      if (isNaN(buyPrice) || isNaN(money)) {
+        showErrorToast('Please enter a valid Buy Price and Money to Invest.');
+        return;
+      }
+
+      if ((!profitPercentInput || isNaN(profitPercent)) && (!customSellPriceInput || isNaN(customSellPrice))) {
+        showErrorToast('Please fill in either Target Profit % or Sell Price.');
         return;
       }
 
@@ -65,15 +69,6 @@
       const effectiveMoney = money - buyFee;
       const amount = effectiveMoney / buyPrice;
 
-      const desiredProfit = money * (profitPercent / 100);
-      const totalNeededAfterSell = money + desiredProfit;
-
-      const requiredSellPrice = totalNeededAfterSell / (amount * (1 - feeRate));
-      const sellAmount = amount * requiredSellPrice;
-      const sellFee = sellAmount * feeRate;
-      const totalReceived = sellAmount - sellFee;
-      const netProfit = totalReceived - money;
-
       const formatIdr = (val) => {
         return "Rp" + (val * usdToIdr).toLocaleString('id-ID', {
           minimumFractionDigits: 2,
@@ -81,23 +76,7 @@
         });
       };
 
-      let customProfitHtml = '';
-      if (!isNaN(customSellPrice) && customSellPrice > 0) {
-        const sellAmountCustom = amount * customSellPrice;
-        const sellFeeCustom = sellAmountCustom * feeRate;
-        const totalReceivedCustom = sellAmountCustom - sellFeeCustom;
-        const netProfitCustom = totalReceivedCustom - money;
-
-        customProfitHtml = ` 
-          <div class="bg-zinc-800 p-4 rounded-xl border border-sky-600">
-            <strong>📊 Profit if Sold at $${customSellPrice.toFixed(2)}:</strong><br>
-            <span class="text-lg font-semibold text-sky-400">$${netProfitCustom.toFixed(2)}</span><br>
-            <span class="text-sm text-gray-400">${formatIdr(netProfitCustom)}</span>
-          </div>
-        `;
-      }
-
-      document.getElementById('output').innerHTML = `
+      let resultHtml = `
         <div class="space-y-4 text-sm text-white animate-fadeIn">
           <h2 class="text-xl font-bold text-center text-emerald-400 mb-2">🔍 Calculation Result</h2>
           <div class="bg-zinc-800 p-4 rounded-xl border border-zinc-700">
@@ -108,7 +87,18 @@
             <strong>💰 Money Invested (After Fee):</strong><br>
             <span class="text-lg font-semibold text-emerald-400">$${effectiveMoney.toFixed(2)}</span><br>
             <span class="text-sm text-gray-400">${formatIdr(effectiveMoney)}</span>
-          </div>
+          </div>`;
+
+      if (!isNaN(profitPercent)) {
+        const desiredProfit = money * (profitPercent / 100);
+        const totalNeededAfterSell = money + desiredProfit;
+        const requiredSellPrice = totalNeededAfterSell / (amount * (1 - feeRate));
+        const sellAmount = amount * requiredSellPrice;
+        const sellFee = sellAmount * feeRate;
+        const totalReceived = sellAmount - sellFee;
+        const netProfit = totalReceived - money;
+
+        resultHtml += `
           <div class="bg-zinc-800 p-4 rounded-xl border border-amber-600">
             <strong>🎯 Must Sell At:</strong><br>
             <span class="text-lg font-semibold text-yellow-400">$${requiredSellPrice.toFixed(2)}</span><br>
@@ -118,10 +108,25 @@
             <strong>📈 Estimated Profit (After Fee):</strong><br>
             <span class="text-lg font-semibold text-pink-400">$${netProfit.toFixed(2)}</span><br>
             <span class="text-sm text-gray-400">${formatIdr(netProfit)}</span>
-          </div>
-          ${customProfitHtml}
-        </div>
-      `;
+          </div>`;
+      }
+
+      if (!isNaN(customSellPrice) && customSellPrice > 0) {
+        const sellAmountCustom = amount * customSellPrice;
+        const sellFeeCustom = sellAmountCustom * feeRate;
+        const totalReceivedCustom = sellAmountCustom - sellFeeCustom;
+        const netProfitCustom = totalReceivedCustom - money;
+
+        resultHtml += `
+          <div class="bg-zinc-800 p-4 rounded-xl border border-sky-600">
+            <strong>📊 Profit if Sold at $${customSellPrice.toFixed(2)}:</strong><br>
+            <span class="text-lg font-semibold text-sky-400">$${netProfitCustom.toFixed(2)}</span><br>
+            <span class="text-sm text-gray-400">${formatIdr(netProfitCustom)}</span>
+          </div>`;
+      }
+
+      resultHtml += `</div>`;
+      document.getElementById('output').innerHTML = resultHtml;
     }
 
     window.onload = fetchExchangeRate;
@@ -143,7 +148,6 @@
       <h1 class="text-3xl font-extrabold mb-6 text-center tracking-tight">📉 Binance Fee & Profit Calculator</h1>
 
       <div class="space-y-6">
-        <!-- Form elements -->
         <div class="relative">
           <input type="text" id="buyPrice" placeholder=" " class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-white bg-zinc-900 rounded-lg border border-zinc-700 appearance-none focus:outline-none focus:ring-0 focus:border-emerald-500 peer" />
           <label for="buyPrice" class="absolute text-sm text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-zinc-900 px-2 peer-focus:px-2 peer-focus:text-emerald-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-1">🪙 Coin Buy Price</label>
