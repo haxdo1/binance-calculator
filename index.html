@@ -7,6 +7,10 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.css" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
+  <!-- Toastify -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
   <script>
     let usdToIdr = 0;
 
@@ -16,7 +20,14 @@
         const data = await res.json();
         usdToIdr = data.usd.idr;
       } catch (err) {
-        console.error("Failed to fetch exchange rate:", err);
+        Toastify({
+          text: "Failed to fetch exchange rate. Try again later.",
+          duration: 4000,
+          gravity: "top",
+          position: "center",
+          backgroundColor: "#f97316",
+          style: { color: "white", borderRadius: "8px", fontSize: "14px" }
+        }).showToast();
         usdToIdr = 0;
       }
     }
@@ -29,10 +40,16 @@
       const membership = document.getElementById('membership').value;
       const profitPercent = parseFloat(document.getElementById('profitPercent').value);
       const useBnbForFee = document.getElementById('useBnb').checked;
-      const customSellPrice = parseFloat(document.getElementById('customSellPrice').value);
 
       if (isNaN(buyPrice) || isNaN(money) || isNaN(profitPercent)) {
-        alert('Please fill in all required fields.');
+        Toastify({
+          text: "Please fill in all required fields correctly!",
+          duration: 4000,
+          gravity: "top",
+          position: "center",
+          backgroundColor: "#ef4444",
+          style: { color: "white", borderRadius: "8px", fontSize: "14px" }
+        }).showToast();
         return;
       }
 
@@ -59,22 +76,6 @@
         });
       };
 
-      let customProfitHtml = '';
-      if (!isNaN(customSellPrice) && customSellPrice > 0) {
-        const sellAmountCustom = amount * customSellPrice;
-        const sellFeeCustom = sellAmountCustom * feeRate;
-        const totalReceivedCustom = sellAmountCustom - sellFeeCustom;
-        const netProfitCustom = totalReceivedCustom - money;
-
-        customProfitHtml = `
-          <div class="bg-zinc-800 p-4 rounded-xl border border-sky-600">
-            <strong>📊 Profit if Sold at $${customSellPrice.toFixed(2)}:</strong><br>
-            <span class="text-lg font-semibold text-sky-400">$${netProfitCustom.toFixed(2)}</span><br>
-            <span class="text-sm text-gray-400">${formatIdr(netProfitCustom)}</span>
-          </div>
-        `;
-      }
-
       document.getElementById('output').innerHTML = `
         <div class="space-y-4 text-sm text-white animate-fadeIn">
           <h2 class="text-xl font-bold text-center text-emerald-400 mb-2">🔍 Calculation Result</h2>
@@ -97,13 +98,13 @@
             <span class="text-lg font-semibold text-pink-400">$${netProfit.toFixed(2)}</span><br>
             <span class="text-sm text-gray-400">${formatIdr(netProfit)}</span>
           </div>
-          ${customProfitHtml}
         </div>
       `;
     }
 
     window.onload = fetchExchangeRate;
   </script>
+
   <style>
     @keyframes fadeIn {
       from {opacity: 0; transform: translateY(10px);}
@@ -143,11 +144,6 @@
         <div class="relative">
           <input type="text" id="profitPercent" placeholder=" " class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-white bg-zinc-900 rounded-lg border border-zinc-700 appearance-none focus:outline-none focus:ring-0 focus:border-emerald-500 peer" />
           <label for="profitPercent" class="absolute text-sm text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-zinc-900 px-2 peer-focus:px-2 peer-focus:text-emerald-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-1">🎯 Target Profit %</label>
-        </div>
-
-        <div class="relative mt-4">
-          <input type="text" id="customSellPrice" placeholder=" " class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-white bg-zinc-900 rounded-lg border border-zinc-700 appearance-none focus:outline-none focus:ring-0 focus:border-emerald-500 peer" />
-          <label for="customSellPrice" class="absolute text-sm text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-zinc-900 px-2 peer-focus:px-2 peer-focus:text-emerald-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-1">📊 Sell Price (Optional)</label>
         </div>
       </div>
 
