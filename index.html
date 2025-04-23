@@ -37,8 +37,10 @@
       const notice = document.createElement('sl-notice');
       notice.setAttribute('duration', '3000');
       notice.setAttribute('type', 'error');
+      notice.setAttribute('placement', 'top');
       notice.textContent = message;
       document.body.appendChild(notice);
+      notice.show();  // Make sure the toast appears
     }
 
     async function calculate() {
